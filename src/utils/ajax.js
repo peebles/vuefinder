@@ -4,6 +4,9 @@ export default (url, {method = 'get', params = {}, json = true, signal = null}) 
     const init = {method: method};
     init.signal = signal;
 
+    // include any cookies
+    init.credentials = 'include';
+
     if (method == 'get') {
         url += '?' + new URLSearchParams(params);
     } else {

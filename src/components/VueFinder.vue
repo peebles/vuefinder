@@ -37,6 +37,7 @@ import VFStatusbar from '../components/Statusbar.vue';
 import VFBreadcrumb from '../components/Breadcrumb.vue';
 import VFContextMenu from '../components/ContextMenu.vue';
 import {useI18n} from '../composables/useI18n.js';
+//import buildURLQuery from '../utils/buildURLQuery.js';
 
 const props = defineProps({
   url: {
@@ -69,6 +70,23 @@ const props = defineProps({
   postData: {
     type: Object,
     default: {}
+  },
+  downloadOverrideEvent: {
+    type: String
+  },
+  uploadOverrideEvent: {
+    type: String
+  },
+  hideAdapterSelection: {
+    type: Boolean,
+    default: false,
+  },
+  hideLanguageSelection: {
+    type: Boolean,
+    default: false,
+  },
+  userRole: {
+    type: String
   }
 });
 const emitter = mitt();
@@ -81,6 +99,11 @@ provide('postData', props.postData);
 provide('adapter', adapter);
 provide('maxFileSize', props.maxFileSize);
 provide('usePropDarkMode', props.usePropDarkMode);
+provide('downloadOverrideEvent', props.downloadOverrideEvent);
+provide('uploadOverrideEvent', props.uploadOverrideEvent);
+provide('hideAdapterSelection', props.hideAdapterSelection);
+provide('hideLanguageSelection', props.hideLanguageSelection);
+provide('userRole', props.userRole);
 
 // Lang Management
 const i18n = useI18n(props.id, props.locale, emitter);
@@ -174,13 +197,32 @@ emitter.on('vf-fetch', ({params, onSuccess = null, onError = null}) => {
       });
 });
 
-emitter.on('vf-download', (url) => {
-  document.getElementById('download_frame').src = url;
+emitter.on('vf-download', (item) => {
+  if (props.downloadOverrideEvent) {
+    emitter.emit(props.downloadOverrideEvent, item);
+  } else {
+    if (item.url) {
+      document.getElementById('download_frame').src = item.url;
+    } else {
+      let url = "TDB"; // buildURLQuery({q:'download' (or preview), adapter: props.selection.adapter, path: item.path});
+    }
+  }
   emitter.emit('vf-modal-close');
 });
 
 onMounted(() => {
   emitter.emit('vf-fetch', {params: {q: 'index', adapter: (adapter.value)}});
+});
+
+// In case the parent wants to listen in and interact with events
+const getEmitter = () => {
+  return emitter;
+}
+
+// Expose any methods for external use
+// emitter = this.$refs.my_vuefinder.getEmitter()
+defineExpose({
+  getEmitter
 });
 
 </script>

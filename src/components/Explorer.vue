@@ -81,7 +81,7 @@
               <span class="overflow-ellipsis overflow-hidden whitespace-nowrap">{{item.basename }}</span>
             </div>
             <div class="col-span-2 text-center">{{ item.file_size ? filesize(item.file_size) : '' }}</div>
-            <div class="col-span-3 overflow-ellipsis overflow-hidden whitespace-nowrap">{{ datetimestring(item.last_modified) }}</div>
+            <div class="col-span-3 overflow-ellipsis overflow-hidden whitespace-nowrap text-center">{{ datetimestring(item.last_modified) }}</div>
           </div>
       </div>
 
@@ -231,7 +231,7 @@ const openItem = (item) => {
     emitter.emit('vf-search-exit');
     emitter.emit('vf-fetch', {params:{q: 'index', adapter: props.data.adapter, path:item.path}});
   } else {
-    emitter.emit('vf-modal-show', {type: 'preview', adapter: props.data.adapter, item});
+    emitter.emit('ca-download', item);
   }
 };
 

@@ -15,12 +15,13 @@ export default {
 </script>
 
 <script setup>
-import {inject, nextTick, reactive, ref} from 'vue';
+import {inject, nextTick, reactive, ref, computed} from 'vue';
 import buildURLQuery from '../utils/buildURLQuery.js';
 import {useApiUrl} from '../composables/useApiUrl.js';
 
 const emitter = inject('emitter');
 const contextmenu = ref(null);
+const userRole = inject('userRole');
 
 const {apiUrl} = useApiUrl();
 
@@ -64,9 +65,9 @@ const menuItems = {
     },
   },
   preview: {
-    title: () =>  t('Preview'),
+    title: () =>  t('Audit'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'preview', adapter:props.current.adapter, item: selectedItems.value[0]});
+      emitter.emit('ca-preview', {type:'preview', adapter:props.current.adapter, item: selectedItems.value[0]});
     },
   },
   open: {
@@ -86,8 +87,7 @@ const menuItems = {
   download: {
     title: () =>  t('Download'),
     action: () => {
-      const url = apiUrl.value + '?' + buildURLQuery({q:'download', adapter: props.current.adapter, path: selectedItems.value[0].path});
-      emitter.emit('vf-download', url);
+      emitter.emit('vf-download', selectedItems.value);
     },
   },
   archive: {
@@ -103,9 +103,9 @@ const menuItems = {
     },
   },
   rename: {
-    title: () =>  t('Rename'),
+    title: () =>  t('Edit'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'rename', items: selectedItems});
+      emitter.emit('ca-edit', {type:'edit', items: selectedItems.value, current: props.current});
     },
   }
 };
@@ -127,6 +127,7 @@ emitter.on('vf-contextmenu-show', ({event, area, items,  target = null}) => {
   if (searchQuery.value) {
     if (target) {
       context.items.push(menuItems.openDir);
+      context.items.push(menuItems.download);
       emitter.emit('vf-context-selected', [target]);
       // console.log('search item selected');
     } else {
@@ -134,30 +135,34 @@ emitter.on('vf-contextmenu-show', ({event, area, items,  target = null}) => {
     }
   } else if (!target && !searchQuery.value) {
     context.items.push(menuItems.refresh);
-    context.items.push(menuItems.newfolder);
+    if (isAdmin.value || isAe.value) context.items.push(menuItems.newfolder);
     emitter.emit('vf-context-selected', []);
     // console.log('no files selected');
   } else if (items.length > 1 && items.some(el => el.path === target.path)) {
     context.items.push(menuItems.refresh);
-    context.items.push(menuItems.archive);
-    context.items.push(menuItems.delete);
+    if (isAdmin.value || isAe.value) context.items.push(menuItems.rename);
+    //context.items.push(menuItems.archive);
+    if (!items.some(el => el.type === 'dir')) context.items.push(menuItems.download);
+    if (isAdmin.value || isAe.value) context.items.push(menuItems.delete);
     emitter.emit('vf-context-selected', items);
     // console.log(items.length + ' selected (more than 1 item.)');
   } else {
     if (target.type == 'dir') {
       context.items.push(menuItems.open);
     } else {
-      context.items.push(menuItems.preview);
+      if (isAdmin.value || isAe.value) context.items.push(menuItems.preview);
       context.items.push(menuItems.download);
     }
-    context.items.push(menuItems.rename);
+    if (isAdmin.value || isAe.value) context.items.push(menuItems.rename);
 
+    /**
     if (target.mime_type == 'application/zip') {
       context.items.push(menuItems.unarchive);
     } else {
       context.items.push(menuItems.archive);
     }
-    context.items.push(menuItems.delete);
+    **/
+    if (isAdmin.value || isAe.value) context.items.push(menuItems.delete);
     emitter.emit('vf-context-selected', [target]);
     // console.log(target.type + ' is selected');
   }
@@ -188,4 +193,6 @@ const showContextMenu = (event, area) => {
   });
 };
 
+const isAdmin = computed(() => userRole === 'admin')
+const isAe = computed(() => userRole === 'ae')
 </script>
