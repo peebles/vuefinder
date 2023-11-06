@@ -12,6 +12,7 @@ export default (url, {method = 'get', params = {}, json = true, signal = null}) 
         // real plusses ("+") have been converted to %2B, but spaces (" ") have been converted to "+".
         // While perhaps strictly legal, it is problematic with some backends.
         url = url.replace(/\+/g, '%20');
+        console.log('url:', url);
     } else {
         init.headers = {};
 
