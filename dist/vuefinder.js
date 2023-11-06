@@ -4,7 +4,7 @@ var as;
 const Pt = (as = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : as.getAttribute("content"), Nt = (r, { method: e = "get", params: s = {}, json: o = !0, signal: l = null }) => {
   const i = { method: e };
   if (i.signal = l, i.credentials = "include", e == "get")
-    r += "?" + new URLSearchParams(s), r = r.replace(/\+/g, "%20"), console.log("url:", r);
+    r += "?" + new URLSearchParams(s), r = r.replace(/\+/g, "%20");
   else {
     i.headers = {}, Pt && (i.headers["X-CSRF-Token"] = Pt);
     let d = new FormData();
