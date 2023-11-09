@@ -40,6 +40,8 @@ const context = reactive({
 
 const selectedItems = ref([]);
 
+const inTrash = computed(() => props.current.dirname.startsWith(`${props.current.adapter}://Trash`));
+
 emitter.on('vf-context-selected', (items) => {
   selectedItems.value = items;
 })
@@ -56,6 +58,12 @@ const menuItems = {
     title: () => t('Delete'),
     action: () => {
       emitter.emit('vf-modal-show', {type:'delete', items: selectedItems});
+    },
+  },
+  restore: {
+    title: () => t('Restore'),
+    action: () => {
+      emitter.emit('vf-modal-show', {type:'restore', items: selectedItems});
     },
   },
   refresh: {
@@ -162,7 +170,12 @@ emitter.on('vf-contextmenu-show', ({event, area, items,  target = null}) => {
       context.items.push(menuItems.archive);
     }
     **/
-    if (isAdmin.value || isAe.value) context.items.push(menuItems.delete);
+    if (isAdmin.value || isAe.value) {
+      if (inTrash.value)
+        context.items.push(menuItems.restore);
+      else
+        context.items.push(menuItems.delete);
+    }
     emitter.emit('vf-context-selected', [target]);
     // console.log(target.type + ' is selected');
   }

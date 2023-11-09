@@ -1,4 +1,5 @@
 export {default as ModalDelete} from './components/modals/ModalDelete.vue';
+export {default as ModalRestore} from './components/modals/ModalRestore.vue';
 export {default as ModalMessage} from './components/modals/ModalMessage.vue';
 export {default as ModalNewFolder} from './components/modals/ModalNewFolder.vue';
 export {default as ModalNewFile} from './components/modals/ModalNewFile.vue';
